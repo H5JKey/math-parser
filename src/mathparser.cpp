@@ -8,10 +8,13 @@ bool MathParser::isOperation(std::string op) {
         op=="/" ||
         op=="(" ||
         op==")" ||
-        op=="~";;
+        op=="~" ||
+        op=="^";
 }
 
 int MathParser::priority(std::string op) {
+    if (op== "^")
+        return 4;
     if (op == "~")
         return 3;
     if (op == "*" || op=="/")
@@ -111,6 +114,8 @@ double MathParser::evaluateRPN(const std::vector<std::string>& RPN) {
                     res = operand1 * operand2;
                 else if (token=="/")
                     res = operand1 / operand2;
+                else if (token=="^")
+                    res = pow(operand1,  operand2);
                 stack.push(res);
             }
         }
