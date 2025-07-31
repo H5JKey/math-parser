@@ -25,6 +25,12 @@ void MathParser::init() {
         Operator::Type::BRACKET, 
         0, false, 0, nullptr, ")"
     });
+
+    registerOperator(",", {
+        Operator::Type::COMMA, 
+        0, false, 0, nullptr,
+        ","
+    });
     
     registerOperator("+", {
         Operator::Type::BINARY, 
@@ -149,14 +155,21 @@ std::vector<std::string> MathParser::toRPN(const std::string& expression) {
         else if (expression[i]=='(') {
             opStack.push(operators["("]);
             i++;
+            expectOperand = true;
         }
         else if (expression[i]==')') {
-            while (opStack.top().type!=Operator::Type::BRACKET) {
+            
+            while (!opStack.empty() && opStack.top().type!=Operator::Type::BRACKET) {
                 RPN.push_back(opStack.top().symbol);
                 opStack.pop();
             }
+            
             if (opStack.empty()) throw std::runtime_error("Mismatched parentheses");
             opStack.pop();
+            if (!opStack.empty() && opStack.top().type == Operator::Type::FUNCTION) {
+                RPN.push_back(opStack.top().symbol);
+                opStack.pop();
+            }
             i++;
         }
         else if (isalpha(expression[i])) {
@@ -184,12 +197,11 @@ std::vector<std::string> MathParser::toRPN(const std::string& expression) {
             //if we get - before operand its unary minus
             if (symbol=="-" && expectOperand) symbol = "~";
             Operator curOp = operators[symbol];
-            while (!opStack.empty()) {
+            while (!opStack.empty() && opStack.top().type !=Operator::Type::BRACKET) {
                 Operator topOp = opStack.top();
-
+                if (topOp.type == Operator::Type::COMMA || topOp.type == Operator::Type::FUNCTION) break;
                 if (topOp.precedence < curOp.precedence) break;
                 if (topOp.precedence == curOp.precedence && curOp.isRightAssociative) break;
-
                 opStack.pop();
                 RPN.push_back(topOp.symbol);
             }
@@ -197,12 +209,10 @@ std::vector<std::string> MathParser::toRPN(const std::string& expression) {
             expectOperand = true;
             i++;
         }
-        else {
-            
-        }
     }
     while (!opStack.empty()) {
-        RPN.push_back(opStack.top().symbol);
+        Operator op = opStack.top();
+        RPN.push_back(op.symbol);
         opStack.pop();
     }
     return RPN;
@@ -214,6 +224,7 @@ double MathParser::evaluateRPN(const std::vector<std::string>& RPN) {
     for (const std::string& symbol: RPN) {
         if (isOperator(symbol)) {
             Operator op = operators[symbol];
+            if (op.type==Operator::Type::COMMA) continue;
             std::vector<double> operands;
             for (int i=0; i<op.operandCount; i++) {
                 operands.insert(operands.begin(),numStack.top());

@@ -15,6 +15,14 @@ int main() {
         }
     };
     const double EPS =1e-6;
+
+    mathParser.registerOperator("max", MathParser::Operator{
+        MathParser::Operator::Type::FUNCTION, 
+        4, false, 2,
+        [](auto args) { return std::max(args[0], args[1]); },
+        "max"
+    });
+
     test(mathParser.evaluate("---4.2")==-4.2, "---4.2 == -4.2");
     test(mathParser.evaluate("-1-2-3")==-6, "-1-2-3 == -6");
     test(mathParser.evaluate("2.1+4.5")==6.6, "2.1 + 4.5 == 6.6");
@@ -29,6 +37,8 @@ int main() {
     test(mathParser.evaluate("9^(1/2)")==3, "9^(1/2) == 3");
     test(mathParser.evaluate("sqrt(3^2+4^2)")==5, "sqrt(3^2 + 4^2) == 5");
     test(fabs(mathParser.evaluate("sin(cos(-3*pi/2))"))<EPS, "sin(cos(-3*pi/2)) ~ 0");
+    test(mathParser.evaluate("max(-1,-2)") == -1, "max(-1, -2) == -1");
+    test(mathParser.evaluate("max(1,max(2,max(3,max(4,-5))))") == 4, "max(1,max(2,max(3,max(4,-5)))) == 4");
     
     if (failures > 0) {
         std::cerr << "\n" << failures << " TESTS FAILED!\n";

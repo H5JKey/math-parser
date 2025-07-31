@@ -14,7 +14,8 @@ public:
             UNARY,
             BINARY,
             FUNCTION,
-            BRACKET
+            BRACKET,
+            COMMA
         };
         Type type;
         int precedence;
