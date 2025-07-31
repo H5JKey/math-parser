@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cassert>
-#include "../src/mathparser.hpp"
+#include "mathparser.hpp"
 
 int main() {
     MathParser mathParser;
