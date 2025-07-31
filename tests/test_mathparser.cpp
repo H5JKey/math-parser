@@ -14,7 +14,7 @@ int main() {
             std::cout << "[OK] " << message << "\n";
         }
     };
-
+    const double EPS =1e-6;
     test(mathParser.evaluate("---4.2")==-4.2, "---4.2 == -4.2");
     test(mathParser.evaluate("-1-2-3")==-6, "-1-2-3 == -6");
     test(mathParser.evaluate("2.1+4.5")==6.6, "2.1 + 4.5 == 6.6");
@@ -26,6 +26,9 @@ int main() {
     test(mathParser.evaluate("-2^4")==-16, "-2^4 == -16");
     test(mathParser.evaluate("(-2)^4")==16, "(-2)^4 == 16");
     test(mathParser.evaluate("2^3+3^2-2*2")==13, "2^3+3^2-2*2 == 13");
+    test(mathParser.evaluate("9^(1/2)")==3, "9^(1/2) == 3");
+    test(mathParser.evaluate("sqrt(3^2+4^2)")==5, "sqrt(3^2 + 4^2) == 5");
+    test(fabs(mathParser.evaluate("sin(cos(-3*pi/2))"))<EPS, "sin(cos(-3*pi/2)) ~ 0");
     
     if (failures > 0) {
         std::cerr << "\n" << failures << " TESTS FAILED!\n";
