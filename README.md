@@ -69,7 +69,7 @@ include(FetchContent)
 FetchContent_Declare(
     math_parser
     GIT_REPOSITORY https://github.com/H5JKey/math-parser.git
-    GIT_TAG main
+    GIT_TAG v1.0.0
 )
 FetchContent_MakeAvailable(math_parser)
 
