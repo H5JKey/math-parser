@@ -1,16 +1,17 @@
-# Math Parser Library ![C++](https://img.shields.io/badge/C++-17-blue.svg) ![Build](https://img.shields.io/badge/Build-CMake-yellow.svg)
+# Math Parser Library ![C++](https://img.shields.io/badge/C++-23-blue.svg) ![Build](https://img.shields.io/badge/Build-CMake-yellow.svg) ![Testing](https://img.shields.io/badge/Testing-CTest-green.svg)
 
 A flexible and extensible C++ library for parsing and evaluating mathematical expressions.
 
 ## Features
 
 - Basic arithmetic operations (`+`, `-`, `*`, `/`, `^`)
-- Unary minus (`-x`)
+- Unary minus (`-x` or `~x`)
 - Math functions (`sqrt`, `sin`, `cos`, `tan`)
 - Constants (`pi`, `e`)
 - Parentheses and operator precedence
 - Floating-point number support
 - Easy to add new operators, functions and constans
+- Convertation to RPN and it`s evaluation
 
 ## Quick Start
 
