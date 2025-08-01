@@ -38,25 +38,57 @@ int main() {
 }
 ```
 
+## Extending Functionality
+
+### Adding Custom Function or Operator
+```cpp
+// Register logarithmic function
+parser.registerOperator("log", parser::Operator{
+    parser::Operator::Type::FUNCTION,
+    4,         // Precedence
+    false,     // Right associativity
+    1,         // Single argument
+    [](auto args) { return std::log(args[0]); },
+    "log"      // Function name
+});
+```
+
+### Adding Constant
+```cpp
+// Register tau constant (2pi)
+parser.registerConstant("tau", 6.28318);
+```
+
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/math-parser.git
+### Method 1: FetchContent (Recommended for CMake Projects)
+
+Add to your CMakeLists.txt:
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    math_parser
+    GIT_REPOSITORY https://github.com/H5JKey/math-parser.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(math_parser)
+
+target_link_libraries(your_target math_parser_lib)
 ```
 
-2. Build with CMake:
+### Method 2: Manual Inclusion
+
+1. Clone repository:
 ```bash
-mkdir build && cd build
-cmake ..
-make
+git clone https://github.com/H5JKey/math-parser.git
 ```
 
-3. Link to your project:
+2. Add to your project:
 ```cmake
 add_subdirectory(path/to/math-parser)
-target_link_libraries(your_target mathparser)
+target_link_libraries(your_target math_parser_lib)
 ```
+
 
 ## Testing
 
