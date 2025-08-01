@@ -7,14 +7,18 @@ on:
     branches: [ "main" ]
 
 jobs:
-  run-tests:
-
+  run-main-tests:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: make 
-      run: mkdir build && cd build && cmake .. && make
-    - name: make test
-      run: cd build && make && make test
-      
+    - name: Checkout MAIN branch
+      uses: actions/checkout@v4
+      with:
+        ref: main
+
+    - name: Build and test
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+        make test
