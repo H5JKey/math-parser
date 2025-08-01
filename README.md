@@ -1,5 +1,8 @@
 # Math Parser Library
 
+![C++](https://img.shields.io/badge/C++-17-blue.svg)
+![Build](https://img.shields.io/badge/Build-CMake-yellow.svg)
+
 A flexible and extensible C++ library for parsing and evaluating mathematical expressions.
 
 ## Features
