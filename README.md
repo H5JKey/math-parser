@@ -11,7 +11,7 @@ A flexible and extensible C++ library for parsing and evaluating mathematical ex
 - Parentheses and operator precedence
 - Floating-point number support
 - Easy to add new operators, functions and constans
-- Convertation to RPN and it`s evaluation
+- Convertation to RPN and it's evaluation
 
 ## Quick Start
 
