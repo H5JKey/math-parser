@@ -19,7 +19,11 @@ int main() {
     mathParser.registerOperator("max", MathParser::Operator{
         MathParser::Operator::Type::FUNCTION, 
         4, false, 2,
-        [](auto args) { return std::max(args[0], args[1]); },
+        [&](auto args) { 
+            double left = mathParser.tokenToDouble(args[0]);
+            double right = mathParser.tokenToDouble(args[1]);
+            return MathParser::Token{MathParser::Token::Type::NUMBER, std::max(left, right)};
+        },
         "max"
     });
 
@@ -39,6 +43,12 @@ int main() {
     test(fabs(mathParser.evaluate("sin(cos(-3*pi/2))"))<EPS, "sin(cos(-3*pi/2)) ~ 0");
     test(mathParser.evaluate("max(-1,-2)") == -1, "max(-1, -2) == -1");
     test(mathParser.evaluate("max(1,max(2,max(3,max(4,-5))))") == 4, "max(1,max(2,max(3,max(4,-5)))) == 4");
+
+    std::cout<<"\nTesting variables...\n\n";
+    test(mathParser.evaluate("x=5")==5, "x = 5");
+    test(mathParser.evaluate("y=7")==7, "y = 7");
+    test(mathParser.evaluate("x = x+y+1")==13, "x = x+y+1");
+    test(mathParser.evaluate("x - y")==6, "x - y == 6");
     
     if (failures > 0) {
         std::cerr << "\n" << failures << " TESTS FAILED!\n";
