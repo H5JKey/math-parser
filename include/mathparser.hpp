@@ -44,6 +44,7 @@ public:
         Type type;
         int precedence;
         bool isRightAssociative;
+        bool isPostfix;
         int operandCount;
         EvaluateFunc evaluate;
         std::string symbol;

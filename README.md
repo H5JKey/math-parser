@@ -25,14 +25,14 @@ int main() {
     double result = parser.evaluate("2 + 2 * 2"); // 6
     
     // Add custom operator
-    parser.registerOperator("max", parser::Operator{
-        parser::Operator::Type::FUNCTION, 
-        4, false, 2,
+    parser.registerOperator("max", MathParser::Operator{
+        MathParser::Operator::Type::FUNCTION, 
+        4, false, false, 2,
         [&](auto args) {
             // this function convert token to double, according of its type
             double left = parser.tokenToDouble(args[0]); 
             double right = parser.tokenToDouble(args[1]);
-            return Token{MathParser::Token::Type::NUMBER, std::max(left, right)}; 
+            return MathParser::Token{MathParser::Token::Type::NUMBER, std::max(left, right)}; 
         },
         "max"
     });
@@ -56,16 +56,17 @@ int main() {
 ### Adding Custom Function or Operator
 ```cpp
 // Register logarithmic function
-parser.registerOperator("log", parser::Operator{
+parser.registerOperator("!", parser::Operator{
     parser::Operator::Type::FUNCTION,
     4,         // Precedence
     false,     // Right associativity
+    true,      // Postfix operator
     1,         // Single argument
     [](auto args) {
           double arg = parser.tokenToDouble(args[0]);
-          return MathParser::Token{MathParser::Token::Type::NUMBER, std::log(arg)};
+          return MathParser::Token{MathParser::Token::Type::NUMBER, std::tgamma(arg+1)};
     }, // Evaluating function
-    "log"      // Function name
+    "!"      // Function name
 });
 ```
 

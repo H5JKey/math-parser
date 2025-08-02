@@ -19,7 +19,7 @@ void MathParser::init() {
     // Добавить в init():
 registerOperator("=", {
     Operator::Type::BINARY, 
-    0, false, 2,
+    0, false, false, 2,
     [this](auto args) {
         if (args[0].type != Token::Type::VARIABLE) 
             throw std::runtime_error("Left operand must be a variable");
@@ -35,23 +35,23 @@ registerOperator("=", {
     });
     registerOperator("(", {
         Operator::Type::BRACKET, 
-        0, false, 0, nullptr, "("
+        0, false, false, 0, nullptr, "("
     });
     
     registerOperator(")", {
         Operator::Type::BRACKET, 
-        0, false, 0, nullptr, ")"
+        0, false, false, 0, nullptr, ")"
     });
 
     registerOperator(",", {
         Operator::Type::COMMA, 
-        0, false, 0, nullptr,
+        0, false, false, 0, nullptr,
         ","
     });
     
     registerOperator("+", {
         Operator::Type::BINARY, 
-        1, false, 2,
+        1, false, false, 2,
         [this](auto args) {
             double left = tokenToDouble(args[0]);
             double right = tokenToDouble(args[1]);
@@ -62,7 +62,7 @@ registerOperator("=", {
     
     registerOperator("-", {
         Operator::Type::BINARY, 
-        1, false, 2,
+        1, false, false, 2,
         [this](auto args) {
             double left = tokenToDouble(args[0]);
             double right = tokenToDouble(args[1]);
@@ -73,7 +73,7 @@ registerOperator("=", {
     
     registerOperator("*", {
         Operator::Type::BINARY, 
-        2, false, 2,
+        2, false, false, 2,
         [this](auto args) {
             double left = tokenToDouble(args[0]);
             double right = tokenToDouble(args[1]);
@@ -84,7 +84,7 @@ registerOperator("=", {
     
     registerOperator("/", {
         Operator::Type::BINARY, 
-        2, false, 2,
+        2, false, false, 2,
         [this](auto args) {
             double left = tokenToDouble(args[0]);
             double right = tokenToDouble(args[1]);
@@ -96,7 +96,7 @@ registerOperator("=", {
     
     registerOperator("^", {
         Operator::Type::BINARY, 
-        4, true, 2,
+        4, true, false, 2,
         [this](auto args) {
             double left = tokenToDouble(args[0]);
             double right = tokenToDouble(args[1]);
@@ -107,7 +107,7 @@ registerOperator("=", {
 
     registerOperator("~", {
         Operator::Type::UNARY, 
-        3, true, 1,
+        3, true, false, 1,
        [this](auto args) {
             double arg = tokenToDouble(args[0]);
             return Token{Token::Type::NUMBER, -arg}; 
@@ -117,7 +117,7 @@ registerOperator("=", {
     
     registerOperator("sqrt", {
         Operator::Type::FUNCTION, 
-        5, false, 1,
+        5, false, false, 1,
         [this](auto args) {
             double arg = tokenToDouble(args[0]);
             return Token{Token::Type::NUMBER, sqrt(arg)}; 
@@ -126,7 +126,7 @@ registerOperator("=", {
     });
     registerOperator("sin", {
         Operator::Type::FUNCTION, 
-        5, false, 1,
+        5, false, false, 1,
         [this](auto args) {
             double arg = tokenToDouble(args[0]);
             return Token{Token::Type::NUMBER, sin(arg)}; 
@@ -135,7 +135,7 @@ registerOperator("=", {
     });
     registerOperator("cos", {
         Operator::Type::FUNCTION, 
-        5, false, 1,
+        5, false, false, 1,
         [this](auto args) {
             double arg = tokenToDouble(args[0]);
             return Token{Token::Type::NUMBER, cos(arg)}; 
@@ -144,7 +144,7 @@ registerOperator("=", {
     });
     registerOperator("tan", {
         Operator::Type::FUNCTION, 
-        5, false, 1,
+        5, false, false, 1,
         [this](auto args) {
             double arg = tokenToDouble(args[0]);
             return Token{Token::Type::NUMBER, tan(arg)};
@@ -267,7 +267,8 @@ std::vector<MathParser::Token> MathParser::toRPN(const std::string& expression) 
                 RPN.push_back(Token{Token::Type::OPERATOR,topOp.symbol});
             }
             opStack.push(curOp);
-            expectOperand = true;
+            if (curOp.isPostfix) expectOperand = false;
+            else expectOperand = true;
             i++;
         }
     }

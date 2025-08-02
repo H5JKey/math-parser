@@ -18,7 +18,7 @@ int main() {
 
     mathParser.registerOperator("max", MathParser::Operator{
         MathParser::Operator::Type::FUNCTION, 
-        4, false, 2,
+        4, false, false, 2,
         [&](auto args) { 
             double left = mathParser.tokenToDouble(args[0]);
             double right = mathParser.tokenToDouble(args[1]);
@@ -27,7 +27,7 @@ int main() {
         "max"
     });
 
-    test(mathParser.evaluate("---4.2")==-4.2, "---4.2 == -4.2");
+    test(mathParser.evaluate("-~-4.2")==-4.2, "---4.2 == -4.2");
     test(mathParser.evaluate("-1-2-3")==-6, "-1-2-3 == -6");
     test(mathParser.evaluate("2.1+4.5")==6.6, "2.1 + 4.5 == 6.6");
     test(mathParser.evaluate("   2     +2   *    2   ")==6, "2 + 2 * 2 == 6");
