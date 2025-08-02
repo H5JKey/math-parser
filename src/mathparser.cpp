@@ -16,6 +16,23 @@ void MathParser::registerConstant(const std::string& symbol, double value) {
 }
 
 void MathParser::init() {
+    // Добавить в init():
+registerOperator("=", {
+    Operator::Type::BINARY, 
+    0, false, 2,
+    [this](auto args) {
+        if (args[0].type != Token::Type::VARIABLE) 
+            throw std::runtime_error("Left operand must be a variable");
+        
+        std::string varName = std::get<std::string>(args[0].value);
+        
+        double value = tokenToDouble(args[1]);
+        
+        variables[varName] = value;
+        return Token{Token::Type::NUMBER, value};
+    },
+    "="
+    });
     registerOperator("(", {
         Operator::Type::BRACKET, 
         0, false, 0, nullptr, "("
@@ -35,30 +52,44 @@ void MathParser::init() {
     registerOperator("+", {
         Operator::Type::BINARY, 
         1, false, 2,
-        [](auto args) { return args[0] + args[1]; },
+        [this](auto args) {
+            double left = tokenToDouble(args[0]);
+            double right = tokenToDouble(args[1]);
+            return Token{Token::Type::NUMBER, left + right}; 
+        },
         "+"
     });
     
     registerOperator("-", {
         Operator::Type::BINARY, 
         1, false, 2,
-        [](auto args) { return args[0] - args[1]; },
+        [this](auto args) {
+            double left = tokenToDouble(args[0]);
+            double right = tokenToDouble(args[1]);
+            return Token{Token::Type::NUMBER, left - right}; 
+        },
         "-"
     });
     
     registerOperator("*", {
         Operator::Type::BINARY, 
         2, false, 2,
-        [](auto args) { return args[0] * args[1]; },
+        [this](auto args) {
+            double left = tokenToDouble(args[0]);
+            double right = tokenToDouble(args[1]);
+            return Token{Token::Type::NUMBER, left * right}; 
+        },
         "*"
     });
     
     registerOperator("/", {
         Operator::Type::BINARY, 
         2, false, 2,
-        [](auto args) { 
-            if (args[1] == 0) throw std::runtime_error("Division by zero");
-            return args[0] / args[1]; 
+        [this](auto args) {
+            double left = tokenToDouble(args[0]);
+            double right = tokenToDouble(args[1]);
+            if (right==0) throw std::runtime_error("Division by zero");
+            return Token{Token::Type::NUMBER, left / right}; 
         },
         "/"
     });
@@ -66,47 +97,57 @@ void MathParser::init() {
     registerOperator("^", {
         Operator::Type::BINARY, 
         4, true, 2,
-        [](auto args) { return pow(args[0], args[1]); },
+        [this](auto args) {
+            double left = tokenToDouble(args[0]);
+            double right = tokenToDouble(args[1]);
+            return Token{Token::Type::NUMBER, std::pow(left , right)}; 
+        },
         "^"
     });
 
     registerOperator("~", {
         Operator::Type::UNARY, 
         3, true, 1,
-        [](auto args) { return -args[0]; },
+       [this](auto args) {
+            double arg = tokenToDouble(args[0]);
+            return Token{Token::Type::NUMBER, -arg}; 
+        },
         "~"
     });
     
     registerOperator("sqrt", {
         Operator::Type::FUNCTION, 
         5, false, 1,
-        [](auto args) { 
-            if (args[0] < 0) throw std::runtime_error("Square root of negative");
-            return sqrt(args[0]); 
+        [this](auto args) {
+            double arg = tokenToDouble(args[0]);
+            return Token{Token::Type::NUMBER, sqrt(arg)}; 
         },
         "sqrt"
     });
     registerOperator("sin", {
         Operator::Type::FUNCTION, 
         5, false, 1,
-        [](auto args) { 
-            return sin(args[0]); 
+        [this](auto args) {
+            double arg = tokenToDouble(args[0]);
+            return Token{Token::Type::NUMBER, sin(arg)}; 
         },
         "sin"
     });
     registerOperator("cos", {
         Operator::Type::FUNCTION, 
         5, false, 1,
-        [](auto args) { 
-            return cos(args[0]); 
+        [this](auto args) {
+            double arg = tokenToDouble(args[0]);
+            return Token{Token::Type::NUMBER, cos(arg)}; 
         },
         "cos"
     });
     registerOperator("tan", {
         Operator::Type::FUNCTION, 
         5, false, 1,
-        [](auto args) { 
-            return tan(args[0]); 
+        [this](auto args) {
+            double arg = tokenToDouble(args[0]);
+            return Token{Token::Type::NUMBER, tan(arg)};
         },
         "tan"
     });
@@ -129,9 +170,26 @@ bool MathParser::isConstant(const std::string& symbol) {
     return constants.find(symbol)!=constants.end();
 }
 
-std::vector<std::string> MathParser::toRPN(const std::string& expression) {
+double MathParser::tokenToDouble(const MathParser::Token& token) {
+        switch (token.type) {
+            case Token::Type::NUMBER:
+                return std::get<double>(token.value);
+            case Token::Type::CONSTANT:
+                return constants[std::get<std::string>(token.value)];
+            case Token::Type::VARIABLE: {
+                const std::string& name = std::get<std::string>(token.value);
+                if (variables.find(name) == variables.end())
+                    throw std::runtime_error("Undefined variable: " + name);
+                return variables[name];
+            }
+            default:
+                throw std::runtime_error("Cannot convert token to number");
+        }
+    }
+
+std::vector<MathParser::Token> MathParser::toRPN(const std::string& expression) {
     std::stack<Operator> opStack;
-    std::vector<std::string> RPN;
+    std::vector<Token> RPN;
 
     bool expectOperand = true;
     int i=0;
@@ -149,7 +207,7 @@ std::vector<std::string> MathParser::toRPN(const std::string& expression) {
                 j++;
             }
             std::string number = expression.substr(i,j-i);
-            RPN.push_back(number);
+            RPN.push_back(Token{Token::Type::NUMBER, stod(number)});
             i=j;
         }
         else if (expression[i]=='(') {
@@ -160,14 +218,14 @@ std::vector<std::string> MathParser::toRPN(const std::string& expression) {
         else if (expression[i]==')') {
             
             while (!opStack.empty() && opStack.top().type!=Operator::Type::BRACKET) {
-                RPN.push_back(opStack.top().symbol);
+                RPN.push_back(Token{Token::Type::OPERATOR,opStack.top().symbol});
                 opStack.pop();
             }
             
             if (opStack.empty()) throw std::runtime_error("Mismatched parentheses");
             opStack.pop();
             if (!opStack.empty() && opStack.top().type == Operator::Type::FUNCTION) {
-                RPN.push_back(opStack.top().symbol);
+                RPN.push_back(Token{Token::Type::OPERATOR,opStack.top().symbol});
                 opStack.pop();
             }
             i++;
@@ -177,18 +235,21 @@ std::vector<std::string> MathParser::toRPN(const std::string& expression) {
             while (j<expression.length() && isalpha(expression[j])) {
                 j++;
             }
+            //functions
             std::string symbol = expression.substr(i,j-i);
             if (isOperator(symbol)) {
                 opStack.push(operators[symbol]);
                 expectOperand = true;
             }
-            //handle constant (variable)
+            //handle constant
             else if (isConstant(symbol)) {
-                RPN.push_back(symbol);
+                RPN.push_back(Token{Token::Type::CONSTANT,symbol});
                 expectOperand = false;
             }
+            //variables
             else {
-                throw std::runtime_error("Unknown symbol");
+                RPN.push_back(Token{Token::Type::VARIABLE,symbol});
+                expectOperand = false;
             }
             i=j;
         }
@@ -203,7 +264,7 @@ std::vector<std::string> MathParser::toRPN(const std::string& expression) {
                 if (topOp.precedence < curOp.precedence) break;
                 if (topOp.precedence == curOp.precedence && curOp.isRightAssociative) break;
                 opStack.pop();
-                RPN.push_back(topOp.symbol);
+                RPN.push_back(Token{Token::Type::OPERATOR,topOp.symbol});
             }
             opStack.push(curOp);
             expectOperand = true;
@@ -212,20 +273,20 @@ std::vector<std::string> MathParser::toRPN(const std::string& expression) {
     }
     while (!opStack.empty()) {
         Operator op = opStack.top();
-        RPN.push_back(op.symbol);
+        RPN.push_back(Token{Token::Type::OPERATOR,op.symbol});
         opStack.pop();
     }
     return RPN;
 
 }
 
-double MathParser::evaluateRPN(const std::vector<std::string>& RPN) {
-    std::stack<double> numStack;
-    for (const std::string& symbol: RPN) {
-        if (isOperator(symbol)) {
-            Operator op = operators[symbol];
+double MathParser::evaluateRPN(const std::vector<Token>& RPN) {
+    std::stack<Token> numStack;
+    for (const Token& token: RPN) {
+        if (token.type == Token::Type::OPERATOR) {
+            Operator op = operators[std::get<std::string>(token.value)];
             if (op.type==Operator::Type::COMMA) continue;
-            std::vector<double> operands;
+            std::vector<Token> operands;
             for (int i=0; i<op.operandCount; i++) {
                 operands.insert(operands.begin(),numStack.top());
                 numStack.pop();
@@ -233,15 +294,19 @@ double MathParser::evaluateRPN(const std::vector<std::string>& RPN) {
             numStack.push(op.evaluate(operands));
         }
         else {
-            if (isConstant(symbol))
-                numStack.push(constants[symbol]);
+            if (token.type == Token::Type::CONSTANT) 
+                numStack.push(Token{Token::Type::NUMBER, tokenToDouble(token)});
             else
-                numStack.push(stod(symbol));
+                numStack.push(token);
         }
     }
-    return numStack.top();
+    return tokenToDouble(numStack.top());
 }
 
 double MathParser::evaluate(const std::string& expression) {
     return evaluateRPN(toRPN(expression));
+}
+
+double MathParser::getVariableValue(const std::string& varName) {
+    return tokenToDouble(Token{Token::Type::VARIABLE, varName});
 }

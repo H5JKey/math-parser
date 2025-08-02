@@ -11,7 +11,7 @@ A flexible and extensible C++ library for parsing and evaluating mathematical ex
 - Parentheses and operator precedence
 - Floating-point number support
 - Easy to add new operators, functions and constans
-- Convertation to RPN and it's evaluation
+- Easy to add and use variables
 
 ## Quick Start
 
@@ -28,7 +28,11 @@ int main() {
     parser.registerOperator("max", parser::Operator{
         parser::Operator::Type::FUNCTION, 
         4, false, 2,
-        [](auto args) { return std::max(args[0], args[1]); },
+        [&](auto args) {
+            double left = parser.tokenToDouble(args[0]); // this function convert token to double, according of its type
+            double right = parser.tokenToDouble(args[1]);
+            return Token{MathParser::Token::Type::NUMBER, std::max(left, right)}; 
+        },
         "max"
     });
 
@@ -49,7 +53,10 @@ parser.registerOperator("log", parser::Operator{
     4,         // Precedence
     false,     // Right associativity
     1,         // Single argument
-    [](auto args) { return std::log(args[0]); },
+    [](auto args) {
+          double arg = parser.tokenToDouble(args[0]);
+          return MathParser::Token{MathParser::Token::Type::NUMBER, std::log(arg)};
+    }, // Evaluating function
     "log"      // Function name
 });
 ```
