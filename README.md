@@ -39,6 +39,13 @@ int main() {
 
     // Evaluate custom function
     result = parser.evaluate("max(2-2*2, 2^2-1)"); // 3
+
+    //Variables
+    parser.evaluate("x = 3"); // 3
+    parser.evaluate("y = 42"); // 42
+    parser.evaluate("x = x + 10"); // 13
+    parser.evaluate("var = y - x"); // 29
+    parser.getVariableValue("var"); // 29
     
     return 0;
 }
