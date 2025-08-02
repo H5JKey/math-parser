@@ -29,7 +29,8 @@ int main() {
         parser::Operator::Type::FUNCTION, 
         4, false, 2,
         [&](auto args) {
-            double left = parser.tokenToDouble(args[0]); // this function convert token to double, according of its type
+            // this function convert token to double, according of its type
+            double left = parser.tokenToDouble(args[0]); 
             double right = parser.tokenToDouble(args[1]);
             return Token{MathParser::Token::Type::NUMBER, std::max(left, right)}; 
         },
