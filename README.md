@@ -48,6 +48,7 @@ int main() {
     parser.evaluate("x = x + 10"); // 13
     parser.evaluate("var = y - x"); // 29
     parser.getVariableValue("var"); // 29
+
     //Compilation
     auto compiled = parser.compile("2+2*2+2*x+10"); // 6+2*x+10
     parser.evaluate("x = 4");
