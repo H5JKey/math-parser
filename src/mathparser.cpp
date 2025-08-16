@@ -281,12 +281,11 @@ std::vector<MathParser::Token> MathParser::toRPN(const std::string& expression) 
 
 }
 
-double MathParser::evaluateRPN(const std::vector<Token>& RPN) {
+double MathParser::evaluate(const std::vector<Token>& compiled) {
     std::stack<Token> numStack;
-    for (const Token& token: RPN) {
+    for (const Token& token: compiled) {
         if (token.type == Token::Type::OPERATOR) {
             Operator op = operators[std::get<std::string>(token.value)];
-            if (op.type==Operator::Type::COMMA) continue;
             std::vector<Token> operands;
             for (int i=0; i<op.operandCount; i++) {
                 operands.insert(operands.begin(),numStack.top());
@@ -295,17 +294,52 @@ double MathParser::evaluateRPN(const std::vector<Token>& RPN) {
             numStack.push(op.evaluate(operands));
         }
         else {
-            if (token.type == Token::Type::CONSTANT) 
-                numStack.push(Token{Token::Type::NUMBER, tokenToDouble(token)});
-            else
-                numStack.push(token);
+            numStack.push(token);
         }
     }
     return tokenToDouble(numStack.top());
 }
 
+#include <iostream>
 double MathParser::evaluate(const std::string& expression) {
-    return evaluateRPN(toRPN(expression));
+    auto compiled = compile(expression);
+    return evaluate(compiled);
+}
+
+std::vector<MathParser::Token>  MathParser::compile(const std::string& expression) {
+    auto RPN = toRPN(expression);
+    std::vector<Token> compiled;
+    for (const Token& token: RPN) {
+        if (token.type == Token::Type::OPERATOR) {
+            Operator op = operators[std::get<std::string>(token.value)];
+            if (op.type==Operator::Type::COMMA) continue;
+            bool allConstants = true;
+            for (int i=0; i<op.operandCount; i++) {
+                if ((compiled.end()-1-i)->type!=Token::Type::NUMBER) {
+                    allConstants = false;
+                    break;
+                }
+            }
+            if (allConstants) {
+                std::vector<Token> operands;
+                for (int i=0; i<op.operandCount; i++) {
+                    operands.insert(operands.begin(),compiled.back());
+                    compiled.pop_back();
+                }
+                compiled.push_back(op.evaluate(operands));
+            }
+            else {
+                compiled.push_back(token);
+            }
+        }
+        else {
+            if (token.type==Token::Type::CONSTANT)
+                compiled.push_back(Token{Token::Type::NUMBER, constants[std::get<std::string>(token.value)]});
+            else
+                compiled.push_back(token);
+        }
+    }
+    return compiled;
 }
 
 double MathParser::getVariableValue(const std::string& varName) {

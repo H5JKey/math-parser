@@ -61,9 +61,7 @@ private:
 
     bool isConstant(const std::string& symbol);
 
-    
-    double evaluateRPN(const std::vector<Token>& RPN);  //evaluate Reverse Polish notation
-    std::vector<Token> toRPN(const std::string& expression);  //make Reverse Polish notation
+    std::vector<Token> toRPN(const std::string& expression);
 
 public:
     MathParser();
@@ -72,6 +70,8 @@ public:
     void registerOperator(const std::string& symbol, Operator op);
     void registerConstant(const std::string& symbol, double value);
     double evaluate(const std::string& expression);
+    std::vector<Token> compile(const std::string& expression);
+    double evaluate(const std::vector<Token>& complied);
     double tokenToDouble(const Token& token);
     double getVariableValue(const std::string& varName);
 };
