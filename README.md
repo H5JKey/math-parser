@@ -12,11 +12,13 @@ A flexible and extensible C++ library for parsing and evaluating mathematical ex
 - Floating-point number support
 - Easy to add new operators, functions and constans
 - Easy to add and use variables
+- Math expression compilation for further using
 
 ## Quick Start
 
 ```cpp
 #include "mathparser.hpp"
+ #include <iostream>
 
 int main() {
     MathParser parser;
@@ -46,7 +48,13 @@ int main() {
     parser.evaluate("x = x + 10"); // 13
     parser.evaluate("var = y - x"); // 29
     parser.getVariableValue("var"); // 29
-    
+    //Compilation
+    auto compiled = parser.compile("2+2*2+2*x+10"); // 6+2*x+10
+    parser.evaluate("x = 4");
+    parser.evaluate(compiled); // 24
+    parser.evaluate("x = 1");
+    parser.evaluate(compiled); // 18
+
     return 0;
 }
 ```
