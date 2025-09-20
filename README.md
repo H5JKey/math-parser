@@ -18,7 +18,7 @@ A flexible and extensible C++ library for parsing and evaluating mathematical ex
 
 ```cpp
 #include "mathparser.hpp"
- #include <iostream>
+#include <iostream>
 
 int main() {
     MathParser parser;
