@@ -1,6 +1,6 @@
 # Math Parser Library ![C++](https://img.shields.io/badge/C++-23-blue.svg) ![Build](https://img.shields.io/badge/Build-CMake-yellow.svg) ![Testing](https://img.shields.io/badge/Testing-CTest-green.svg)
 
-A flexible and extensible C++ library for parsing and evaluating mathematical expressions.
+A flexible and extensible C++ library for parsing and evaluating mathematical expressions implementing the shunting-yard algorithm.
 
 ## Features
 
