@@ -16,22 +16,21 @@ void MathParser::registerConstant(const std::string& symbol, double value) {
 }
 
 void MathParser::init() {
-    // Добавить в init():
-registerOperator("=", {
-    Operator::Type::BINARY, 
-    0, false, false, 2,
-    [this](auto args) {
-        if (args[0].type != Token::Type::VARIABLE) 
-            throw std::runtime_error("Left operand must be a variable");
-        
-        std::string varName = std::get<std::string>(args[0].value);
-        
-        double value = tokenToDouble(args[1]);
-        
-        variables[varName] = value;
-        return Token{Token::Type::NUMBER, value};
-    },
-    "="
+    registerOperator("=", {
+        Operator::Type::BINARY, 
+        0, false, false, 2,
+        [this](auto args) {
+            if (args[0].type != Token::Type::VARIABLE) 
+                throw std::runtime_error("Left operand must be a variable");
+            
+            std::string varName = std::get<std::string>(args[0].value);
+            
+            double value = tokenToDouble(args[1]);
+            
+            variables[varName] = value;
+            return Token{Token::Type::NUMBER, value};
+        },
+        "="
     });
     registerOperator("(", {
         Operator::Type::BRACKET, 
