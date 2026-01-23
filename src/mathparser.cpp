@@ -300,7 +300,6 @@ double MathParser::evaluate(const std::vector<Token>& compiled) {
     return tokenToDouble(numStack.top());
 }
 
-#include <iostream>
 double MathParser::evaluate(const std::string& expression) {
     auto compiled = compile(expression);
     return evaluate(compiled);
