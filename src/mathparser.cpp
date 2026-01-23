@@ -169,22 +169,31 @@ bool MathParser::isConstant(const std::string& symbol) {
     return constants.find(symbol)!=constants.end();
 }
 
-double MathParser::tokenToDouble(const MathParser::Token& token) {
-        switch (token.type) {
-            case Token::Type::NUMBER:
-                return std::get<double>(token.value);
-            case Token::Type::CONSTANT:
-                return constants[std::get<std::string>(token.value)];
-            case Token::Type::VARIABLE: {
-                const std::string& name = std::get<std::string>(token.value);
-                if (variables.find(name) == variables.end())
-                    throw std::runtime_error("Undefined variable: " + name);
-                return variables[name];
-            }
-            default:
-                throw std::runtime_error("Cannot convert token to number");
+double MathParser::tokenToDouble(const MathParser::Token& token) const {
+    switch (token.type) {
+        case Token::Type::NUMBER:
+            return std::get<double>(token.value);
+            
+        case Token::Type::CONSTANT: {
+            const auto& name = std::get<std::string>(token.value);
+            auto it = constants.find(name);
+            if (it == constants.end())
+                throw std::runtime_error("Unknown constant: " + name);
+            return it->second;
         }
+            
+        case Token::Type::VARIABLE: {
+            const auto& name = std::get<std::string>(token.value);
+            auto it = variables.find(name);
+            if (it == variables.end())
+                throw std::runtime_error("Undefined variable: " + name);
+            return it->second;
+        }
+            
+        default:
+            throw std::runtime_error("Cannot convert token to number");
     }
+}
 
 std::vector<MathParser::Token> MathParser::toRPN(const std::string& expression) {
     std::stack<Operator> opStack;
@@ -256,7 +265,10 @@ std::vector<MathParser::Token> MathParser::toRPN(const std::string& expression) 
             std::string symbol = std::string(1,expression[i]);
             //if we get - before operand its unary minus
             if (symbol=="-" && expectOperand) symbol = "~";
-            Operator curOp = operators[symbol];
+            auto it = operators.find(symbol);
+            if (it == operators.end())
+                throw std::runtime_error("Unknown operator: " + symbol);
+            Operator curOp = it->second;
             while (!opStack.empty() && opStack.top().type !=Operator::Type::BRACKET) {
                 Operator topOp = opStack.top();
                 if (topOp.type == Operator::Type::COMMA || topOp.type == Operator::Type::FUNCTION) break;
@@ -284,7 +296,11 @@ double MathParser::evaluate(const std::vector<Token>& compiled) {
     std::stack<Token> numStack;
     for (const Token& token: compiled) {
         if (token.type == Token::Type::OPERATOR) {
-            Operator op = operators[std::get<std::string>(token.value)];
+           const std::string& opSymbol = std::get<std::string>(token.value);
+            auto it = operators.find(opSymbol);
+            if (it == operators.end())
+                throw std::runtime_error("Unknown operator: " + opSymbol);
+            const Operator& op = it->second;
             std::vector<Token> operands;
             for (int i=0; i<op.operandCount; i++) {
                 operands.insert(operands.begin(),numStack.top());
@@ -309,7 +325,11 @@ std::vector<MathParser::Token>  MathParser::compile(const std::string& expressio
     std::vector<Token> compiled;
     for (const Token& token: RPN) {
         if (token.type == Token::Type::OPERATOR) {
-            Operator op = operators[std::get<std::string>(token.value)];
+            const std::string& opName = std::get<std::string>(token.value);
+            auto it = operators.find(opName);
+            if (it == operators.end())
+                throw std::runtime_error("Unknown operator: " + opName);
+            Operator op = it->second;
             if (op.type==Operator::Type::COMMA) continue;
             bool allConstants = true;
             for (int i=0; i<op.operandCount; i++) {
@@ -331,8 +351,13 @@ std::vector<MathParser::Token>  MathParser::compile(const std::string& expressio
             }
         }
         else {
-            if (token.type==Token::Type::CONSTANT)
-                compiled.push_back(Token{Token::Type::NUMBER, constants[std::get<std::string>(token.value)]});
+            if (token.type==Token::Type::CONSTANT) {
+                const std::string& constName = std::get<std::string>(token.value);
+                auto it = constants.find(constName);
+                if (it == constants.end())
+                    throw std::runtime_error("Unknown constant: " + constName);
+                compiled.push_back(Token{Token::Type::NUMBER, it->second});
+            }
             else
                 compiled.push_back(token);
         }

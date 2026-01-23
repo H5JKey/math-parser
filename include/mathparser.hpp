@@ -19,18 +19,6 @@ public:
         };
         Type type;
         std::variant<double, std::string> value;
-
-        bool operator<(const Token& other) const {
-            if (type != other.type) 
-                return static_cast<int>(type) < static_cast<int>(other.type);
-            
-            switch(type) {
-                case Type::NUMBER:
-                    return std::get<double>(value) < std::get<double>(other.value);
-                default:
-                    return std::get<std::string>(value) < std::get<std::string>(other.value);
-            }
-        }
     };
     using EvaluateFunc = std::function<Token(const std::vector<Token>&)>;
     struct Operator {
@@ -72,6 +60,6 @@ public:
     double evaluate(const std::string& expression);
     std::vector<Token> compile(const std::string& expression);
     double evaluate(const std::vector<Token>& complied);
-    double tokenToDouble(const Token& token);
+    double tokenToDouble(const Token& token) const;
     double getVariableValue(const std::string& varName);
 };
