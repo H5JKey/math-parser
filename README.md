@@ -64,7 +64,7 @@ int main() {
 
 ### Adding Custom Function or Operator
 ```cpp
-// Register logarithmic function
+// Register factorial function
 parser.registerOperator("!", parser::Operator{
     parser::Operator::Type::FUNCTION,
     4,         // Precedence
